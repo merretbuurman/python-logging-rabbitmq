@@ -21,7 +21,8 @@ class RabbitMQHandlerOneWay(logging.Handler):
                  username=None, password=None,
                  exchange='log', declare_exchange=False,
                  routing_key_format="{name}.{level}", close_after_emit=False,
-                 fields=None, fields_under_root=True, message_headers=None):
+                 fields=None, fields_under_root=True, message_headers=None,
+                 routing_key=None):
         """
         Initialize the handler.
 
@@ -36,6 +37,7 @@ class RabbitMQHandlerOneWay(logging.Handler):
         :param exchange:           Send logs using this exchange.
         :param declare_exchange:   Whether or not to declare the exchange.
         :param routing_key_format: Customize how messages will be routed to the queues.
+        :param routing_key:        Allows to set a specific routing key. Overrides routing_key_format.
         :param close_after_emit:   Close connection after emit the record?
         :param fields:             Send these fields as part of all logs.
         :param fields_under_root:  Merge the fields in the root object.
@@ -49,6 +51,7 @@ class RabbitMQHandlerOneWay(logging.Handler):
         self.channel = None
         self.exchange_declared = not declare_exchange
         self.routing_key_format = routing_key_format
+        self.routing_key = routing_key
         self.close_after_emit = close_after_emit
 
         # Connection parameters.
@@ -153,7 +156,9 @@ class RabbitMQHandlerOneWay(logging.Handler):
 
     def emit(self, record):
         try:
-            routing_key = self.routing_key_format.format(name=record.name, level=record.levelname)
+            routing_key = self.routing_key
+            if not routing_key:
+                routing_key = self.routing_key_format.format(name=record.name, level=record.levelname)
             self.queue.put((record, routing_key))
         except Exception:
             self.channel, self.connection = None, None
