@@ -18,7 +18,7 @@ class RabbitMQHandler(logging.Handler):
                  exchange='log', declare_exchange=False,
                  routing_key_format="{name}.{level}", close_after_emit=False,
                  fields=None, fields_under_root=True, message_headers=None,
-                 routing_key=None):
+                 routing_key=None, persistent_delivery=True):
         """
         Initialize the handler.
 
@@ -28,6 +28,7 @@ class RabbitMQHandler(logging.Handler):
         :param port:               RabbitMQ Port. Default 5672
         :param connection_params:  Allow extra params to connect with RabbitMQ.
         :param message_headers:    A dictionary of headers to be published with the message. Optional.
+        :param persistent_delivery: A Boolean to specify message persistent delivery. Optional, defaults to True. 
         :param username:           Username in case of authentication.
         :param password:           Password for the username.
         :param exchange:           Send logs using this exchange.
@@ -62,6 +63,7 @@ class RabbitMQHandler(logging.Handler):
 
         # Extra params for message publication
         self.message_headers = message_headers
+        self.delivery_mode = 2 if persistent_delivery else 1
 
         # Logging.
         self.formatter = formatter
@@ -130,7 +132,7 @@ class RabbitMQHandler(logging.Handler):
                 routing_key=routing_key,
                 body=self.format(record),
                 properties=pika.BasicProperties(
-                    delivery_mode=2,
+                    delivery_mode=self.delivery_mode,
                     headers=self.message_headers
                 )
             )
