@@ -15,7 +15,7 @@ CLASSIFIERS = [
 ]
 
 INSTALL_REQUIRES = [
-    'pika==0.10.0'
+    'pika>=0.10.0,<=0.11.2'
 ]
 
 setup(name='python-logging-rabbitmq',
