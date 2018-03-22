@@ -14,9 +14,8 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.5'
 ]
 
-INSTALL_REQUIRES = [
-    'pika>=0.10.0,<=0.11.2'
-]
+with open('requirements.txt') as f:
+    INSTALL_REQUIRES = f.read().splitlines()
 
 setup(name='python-logging-rabbitmq',
       version='1.0.7',
