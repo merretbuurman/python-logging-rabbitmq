@@ -22,22 +22,22 @@ class RabbitMQHandler(logging.Handler):
         """
         Initialize the handler.
 
-        :param level:              Logs level.
-        :param formatter:          Use custom formatter for the logs.
-        :param host:               RabbitMQ host. Default localhost
-        :param port:               RabbitMQ Port. Default 5672
-        :param connection_params:  Allow extra params to connect with RabbitMQ.
-        :param message_headers:    A dictionary of headers to be published with the message. Optional.
+        :param level:               Logs level.
+        :param formatter:           Use custom formatter for the logs.
+        :param host:                RabbitMQ host. Default localhost
+        :param port:                RabbitMQ Port. Default 5672
+        :param connection_params:   Allow extra params to connect with RabbitMQ.
+        :param message_headers:     A dictionary of headers to be published with the message. Optional.
         :param persistent_delivery: A Boolean to specify message persistent delivery. Optional, defaults to True. 
-        :param username:           Username in case of authentication.
-        :param password:           Password for the username.
-        :param exchange:           Send logs using this exchange.
-        :param declare_exchange:   Whether or not to declare the exchange.
-        :param routing_key_format: Customize how messages will be routed to the queues.
-        :param routing_key:        Allows to set a specific routing key. Overrides routing_key_format.
-        :param close_after_emit:   Close connection after emit the record?
-        :param fields:             Send these fields as part of all logs.
-        :param fields_under_root:  Merge the fields in the root object.
+        :param username:            Username in case of authentication.
+        :param password:            Password for the username.
+        :param exchange:            Send logs using this exchange.
+        :param declare_exchange:    Whether or not to declare the exchange.
+        :param routing_key_format:  Customize how messages will be routed to the queues.
+        :param routing_key:         Allows to set a specific routing key. Overrides routing_key_format.
+        :param close_after_emit:    Close connection after emit the record?
+        :param fields:              Send these fields as part of all logs.
+        :param fields_under_root:   Merge the fields in the root object.
         """
 
         super(RabbitMQHandler, self).__init__(level=level)
