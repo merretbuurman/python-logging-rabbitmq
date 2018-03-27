@@ -134,7 +134,7 @@ class RabbitMQHandlerOneWay(logging.Handler):
     def message_worker(self):
         while 1:
             try:
-                record, routing_key = self.queue.get()
+                record, routing_key, headers = self.queue.get()
 
                 if not self.connection or self.connection.is_closed or not self.channel or self.channel.is_closed:
                     self.open_connection()
@@ -145,7 +145,7 @@ class RabbitMQHandlerOneWay(logging.Handler):
                     body=self.format(record),
                     properties=pika.BasicProperties(
                         delivery_mode=self.delivery_mode,
-                        headers=self.message_headers
+                        headers=headers
                     )
                 )
             except Exception:
@@ -156,12 +156,25 @@ class RabbitMQHandlerOneWay(logging.Handler):
                 if self.close_after_emit:
                     self.close_connection()
 
+    def __get_headers_for_message(self, record):
+        headers = record.headers
+        if self.message_headers and headers:
+            h = dict(self.message_headers)
+            h.update(headers)
+            headers = h
+        elif self.message_headers and not headers:
+            headers = self.message_headers
+        return headers
+
     def emit(self, record):
         try:
             routing_key = self.routing_key
             if not routing_key:
                 routing_key = self.routing_key_format.format(name=record.name, level=record.levelname)
-            self.queue.put((record, routing_key))
+
+            headers = self.__get_headers_for_message(record)
+
+            self.queue.put((record, routing_key, headers))
         except Exception:
             self.channel, self.connection = None, None
             self.handleError(record)

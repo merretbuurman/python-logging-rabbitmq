@@ -116,6 +116,22 @@ class RabbitMQHandler(logging.Handler):
 
         self.connection, self.channel = None, None
 
+    def __get_headers_for_message(self, record):
+        headers = record.headers
+        if self.message_headers and headers:
+            h = dict(self.message_headers)
+            h.update(headers)
+            headers = h
+        elif self.message_headers and not headers:
+            headers = self.message_headers
+        return headers
+
+    '''
+    Send a log message to RabbitMQ.
+
+    :param record: The log record as a string.
+    :param headers: RabbitMQ message headers (optional)
+    '''
     def emit(self, record):
         self.acquire()
 
@@ -127,13 +143,15 @@ class RabbitMQHandler(logging.Handler):
             if not routing_key:
                 routing_key = self.routing_key_format.format(name=record.name, level=record.levelname)
 
+            headers = self.__get_headers_for_message(record)
+
             self.channel.basic_publish(
                 exchange=self.exchange,
                 routing_key=routing_key,
                 body=self.format(record),
                 properties=pika.BasicProperties(
                     delivery_mode=self.delivery_mode,
-                    headers=self.message_headers
+                    headers=headers
                 )
             )
 
